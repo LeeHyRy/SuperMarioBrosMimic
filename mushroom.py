@@ -1,10 +1,13 @@
+import pico2d
+
 class Mushroom:
+    mushX = 1
+    mushY = 4158 - 4074 - 16
+
     def __init__(self, inX, inY):
         self.x, self.y = inX, inY
         self.speed = 2
         self.gravSpeed = 0
-        self.mushX = 1
-        self.mushY = charY - 4074 - 16
         self.dir = -1;
     def update(self):
         self.x -= self.speed * self.dir
@@ -18,4 +21,4 @@ class Mushroom:
             self.gravSpeed = 0
             self.y = 51
     def draw(self):
-        character.clip_draw(self.mushX, self.mushY, 16, 16, self.x, self.y)
+        pico2d.character.clip_draw(Mushroom.mushX, Mushroom.mushY, 16, 16, self.x, self.y)
