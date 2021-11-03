@@ -2,58 +2,14 @@ from pico2d import *
 import math
 
 import mushroom
-
-
-class nBlock:
-    def __init__(self, inX, inY):
-        self.x, self.y = inX + 8, inY + 16
-        self.nbX = 154
-        self.nbY = tileY - 142 - 16
-        self.nbF = 4
-        self.frame = 0
-    def draw(self):
-        tile.clip_draw(self.nbX + self.frame * 17, self.nbY, 16, 16, self.x, self.y - 24)
-
-class platBlock:
-    def __init__(self, inX, inY):
-        self.x, self.y = inX + 8, inY + 16
-        self.nbX = 120
-        self.nbY = tileY - 74 - 16
-        self.nbF = 3
-        self.frame = 1
-    def draw(self):
-        tile.clip_draw(self.nbX + self.frame * 17, self.nbY, 16, 16, self.x, self.y - 24)
-
-class iceBlock:
-    def __init__(self, inX, inY):
-        self.x, self.y = inX + 8, inY + 16
-        self.nbX = 137
-        self.nbY = tileY - 142 - 16
-        self.nbF = 1
-        self.frame = 0
-    def draw(self):
-        tile.clip_draw(self.nbX + self.frame * 17, self.nbY, 16, 16, self.x, self.y - 24)
-
-class itemBlock:
-    def __init__(self, inX, inY):
-        self.x, self.y = inX + 8, inY + 16
-        self.nbX = 35
-        self.nbY = tileY - 23 - 16
-        self.nbF = 2
-        self.frame = 0
-        # 0은 버섯
-        self.item = 0
-    def draw(self):
-        tile.clip_draw(self.nbX + self.frame * 17 * 3, self.nbY, 16, 16, self.x, self.y - 24)
+import block
 
 open_canvas()
 
-tile = load_image('Tileset.png')
 character = load_image('Mario.png')
 back = load_image('Background.png')
 
 charX, charY = 779, 4158
-tileX, tileY = 1369, 3160
 cDict = {
     'IdleX': 1,
     'IdleY': charY - 22 - 32,
@@ -97,13 +53,13 @@ def handle_events():
                 mushroomList.append(mushroom.Mushroom(event.x, tmpEventY))
             if event.button == SDL_BUTTON_RIGHT:
                 if blockSelect == 0:
-                    nBlockList.append(nBlock(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
+                    nBlockList.append(block.normal(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
                 elif blockSelect == 1:
-                    platBlockList.append(platBlock(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
+                    platBlockList.append(block.plat(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
                 elif blockSelect == 2:
-                    iceBlockList.append(iceBlock(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
+                    iceBlockList.append(block.ice(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
                 elif blockSelect == 3:
-                    itemBlockList.append(itemBlock(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
+                    itemBlockList.append(block.item(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
         if event.type == SDL_QUIT:
             running = False
         elif event.type == SDL_KEYDOWN:
