@@ -1,7 +1,7 @@
 from pico2d import *
 import math
 
-import mushroom
+import item
 import block
 
 open_canvas()
@@ -50,7 +50,7 @@ def handle_events():
         if event.type == SDL_MOUSEBUTTONDOWN:
             tmpEventY = 600 - event.y
             if event.button == SDL_BUTTON_LEFT:
-                mushroomList.append(mushroom.Mushroom(event.x, tmpEventY))
+                mushroomList.append(item.mushroom(event.x, tmpEventY))
             if event.button == SDL_BUTTON_RIGHT:
                 if blockSelect == 0:
                     nBlockList.append(block.normal(event.x - (event.x % 16), tmpEventY + (16 - tmpEventY % 16)))
@@ -241,7 +241,7 @@ def conflict_check():
         if abs(itB.x - x) < 18 and 8 < itB.y - y < chaHead:
             y = itB.y - chaHead
             if itB.frame == 0:
-                mushroomList.append(mushroom.Mushroom(itB.x, itB.y + 16))
+                mushroomList.append(item.mushroom(itB.x, itB.y + 16))
             itB.frame = 1
             chaGravSpeed = 0
 

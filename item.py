@@ -1,7 +1,8 @@
 import pico2d
+image = pico2d.load_image('Mario.png')
 
-class Mushroom:
-    image = pico2d.load_image('Mario.png')
+class mushroom:
+    global image
     imageX = 1
     imageY = 4158 - 4074 - 16
 
@@ -24,4 +25,5 @@ class Mushroom:
             self.y = 51
 
     def draw(self):
-        pico2d.character.clip_draw(Mushroom.imageX, Mushroom.imageY, 16, 16, self.x, self.y)
+        pico2d.character.clip_draw(mushroom.imageX, mushroom.imageY, 16, 16, self.x, self.y)
+

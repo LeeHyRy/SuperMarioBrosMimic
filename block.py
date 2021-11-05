@@ -1,7 +1,8 @@
 import pico2d
+image = pico2d.load_image('Tileset.png')
 
 class normal:
-    image = pico2d.load_image('Tileset.png')
+    global image
     imageX = 154
     imageY = 3160 - 142 - 16
 
@@ -11,10 +12,10 @@ class normal:
         self.frame = 0
 
     def draw(self):
-        pico2d.tile.clip_draw(normal.imageX + self.frame * 17, normal.imageY, 16, 16, self.x, self.y - 24)
+        pico2d.image.clip_draw(normal.imageX + self.frame * 17, normal.imageY, 16, 16, self.x, self.y - 24)
 
 class plat:
-    image = pico2d.load_image('Tileset.png')
+    global image
     imageX = 120
     imageY = 3160 - 74 - 16
 
@@ -27,7 +28,7 @@ class plat:
         pico2d.image.clip_draw(plat.imageX + self.frame * 17, plat.imageY, 16, 16, self.x, self.y - 24)
 
 class ice:
-    image = pico2d.load_image('Tileset.png')
+    global image
     imageX = 137
     imageY = 3160 - 142 - 16
 
@@ -40,7 +41,7 @@ class ice:
         pico2d.image.clip_draw(ice.imageX + self.frame * 17, ice.imageY, 16, 16, self.x, self.y - 24)
 
 class item:
-    image = pico2d.load_image('Tileset.png')
+    global image
     imageX = 35
     imageY = 3160 - 23 - 16
 
