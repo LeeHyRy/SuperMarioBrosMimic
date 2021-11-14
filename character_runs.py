@@ -1,10 +1,11 @@
 from pico2d import *
 import math
 
+open_canvas()
+
+# 반드시 open_canvas 아래에 존재해야함!
 import item
 import block
-
-open_canvas()
 
 character = load_image('Mario.png')
 back = load_image('Background.png')
