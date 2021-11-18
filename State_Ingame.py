@@ -1,7 +1,6 @@
 from pico2d import *
 import GameFrame
 import GameWorld
-import math
 
 import mario
 import item
@@ -17,6 +16,7 @@ enemies = []
 
 
 PlaceKeyNumber = 1
+background = None
 
 
 def collide(a, b):
@@ -49,6 +49,7 @@ def collide_top(a, b):
 
 def enter():
     global player
+    global background
     player = mario.Mario()
     GameWorld.add_object(player, 1)
 
@@ -62,7 +63,6 @@ def enter():
     GameWorld.add_objects(enemies, 1)
 
     background = load_image('Background.png')
-    background.clip_draw(1, 6874 - 12 - 512, 512, 512, 256, 256)
 
 
 
@@ -92,6 +92,8 @@ def handle_events():
             GameFrame.quit_state()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_MINUS:
             player.kill()
+
+
         elif event.type == SDL_KEYDOWN and event.key == SDLK_1:
             PlaceKeyNumber = 1
         elif event.type == SDL_KEYDOWN and event.key == SDLK_2:
@@ -159,7 +161,10 @@ def update():
 
 
 def draw():
+    global background
     clear_canvas()
+    for i in range(10):
+        background.clip_draw(1, 6874 - 12 - 512, 512, 512, 256 * i, 256)
     for gameObj in GameWorld.all_objects():
         gameObj.draw()
     font = load_font('CookieRun.ttf', 16)
