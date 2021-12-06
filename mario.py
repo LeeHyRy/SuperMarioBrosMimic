@@ -11,7 +11,7 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 RUN_ACCEL_MPS2 = RUN_SPEED_MPS / 120.0
 RUN_ACCEL_PPS2 = RUN_ACCEL_MPS2 * PIXEL_PER_METER
 
-FALL_SPEED_KMPH = 100.0
+FALL_SPEED_KMPH = 200.0
 FALL_SPEED_MPM = (FALL_SPEED_KMPH * 1000.0 / 60.0)
 FALL_SPEED_MPS = (FALL_SPEED_MPM / 60.0)
 FALL_SPEED_PPS = (FALL_SPEED_MPS * PIXEL_PER_METER)
@@ -128,7 +128,7 @@ class IdleState:
     def exit(mario, event):
         if event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS
+                mario.fall_speed = -FALL_SPEED_PPS / 2
             mario.frame = 0
             mario.jumped = True
 
@@ -160,7 +160,7 @@ class AccelState:
     def exit(mario, event):
         if event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS
+                mario.fall_speed = -FALL_SPEED_PPS / 2
             mario.frame = 0
             mario.jumped = True
 
@@ -192,7 +192,7 @@ class DecelState:
             mario.dir = -1
         elif event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS
+                mario.fall_speed = -FALL_SPEED_PPS / 2
             mario.frame = 0
             mario.jumped = True
 
@@ -224,7 +224,7 @@ class SkidState:
             mario.dir *= -1
         elif event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS
+                mario.fall_speed = -FALL_SPEED_PPS / 2
             mario.frame = 0
             mario.jumped = True
 
@@ -316,9 +316,9 @@ class SkidState:
 # 상태 할당
 next_state_table = {
     IdleState: {LEFT_UP: AccelState, RIGHT_UP: AccelState, RIGHT_DOWN: AccelState, LEFT_DOWN: AccelState,
-                SPACE: IdleState},
+                SPACE: IdleState, ZERO_SPEED: IdleState},
     AccelState: {LEFT_UP: DecelState, RIGHT_UP: DecelState, LEFT_DOWN: SkidState, RIGHT_DOWN: SkidState,
-                 SPACE: AccelState},
+                 SPACE: AccelState, ZERO_SPEED: AccelState},
     DecelState: {LEFT_DOWN: AccelState, RIGHT_DOWN: AccelState, ZERO_SPEED: IdleState,
                  SPACE: DecelState},
     SkidState: {LEFT_UP: AccelState, RIGHT_UP: AccelState, ZERO_SPEED: IdleState,

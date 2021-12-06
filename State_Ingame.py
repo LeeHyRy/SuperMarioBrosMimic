@@ -106,24 +106,32 @@ def handle_events():
             gridX = event.x - ((event.x + 8) % 16 - 8)
             gridY = event.y - ((event.y + 8) % 16 - 8)
             if PlaceKeyNumber == 1:
-                GameWorld.add_object(block.Normal(gridX, 600 - gridY), 1)
+                GameWorld.delete_objects(blocks)
                 blocks += [block.Normal(gridX, 600 - gridY)]
+                GameWorld.add_objects(blocks, 1)
             elif PlaceKeyNumber == 2:
-                GameWorld.add_object(block.Plat(gridX, 600 - gridY), 1)
+                GameWorld.delete_objects(blocks)
                 blocks += [block.Plat(gridX, 600 - gridY)]
+                GameWorld.add_objects(blocks, 1)
             elif PlaceKeyNumber == 3:
-                GameWorld.add_object(block.Ice(gridX, 600 - gridY), 1)
+                GameWorld.delete_objects(blocks)
                 blocks += [block.Ice(gridX, 600 - gridY)]
+                GameWorld.add_objects(blocks, 1)
             elif PlaceKeyNumber == 4:
-                GameWorld.add_object(block.Item(gridX, 600 - gridY), 1)
-                blocks += [block.Ice(gridX, 600 - gridY)]
+                GameWorld.delete_objects(blocks)
+                blocks += [block.Item(gridX, 600 - gridY)]
+                GameWorld.add_objects(blocks, 1)
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_RIGHT:
+            gridX = event.x - ((event.x + 8) % 16 - 8)
+            gridY = event.y - ((event.y + 8) % 16 - 8)
             if PlaceKeyNumber == 1:
-                GameWorld.add_object(item.Mushroom(event.x, 600 - event.y), 1)
-                items += [item.Mushroom(event.x, 600 - event.y)]
+                GameWorld.delete_objects(items)
+                items += [item.Mushroom(gridX, 600 - gridY)]
+                GameWorld.add_object(items, 1)
             if PlaceKeyNumber == 2:
-                GameWorld.add_object(item.Coin(event.x, 600 - event.y), 1)
-                items += [item.Coin(event.x, 600 - event.y)]
+                GameWorld.delete_objects(items)
+                items += [item.Coin(gridX, 600 - gridY)]
+                GameWorld.add_object(items, 1)
         else:
             player.handle_event(event)
 

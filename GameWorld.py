@@ -21,6 +21,14 @@ def remove_object(singleObj):
             break
 
 
+# 해당 목록 제거
+def delete_objects(groupObj):
+    for i in range(len(objects)):
+        if groupObj in objects[i]:
+            objects[i].remove(groupObj)
+            break
+
+
 # 모든 객체 제거
 def clear_objects():
     for singleObj in all_objects():
