@@ -28,7 +28,7 @@ def load_saved_world():
     for o in GameWorld.all_objects():
         if isinstance(o, mario.Mario):
             server.player = o
-        elif isinstance(o, (item.Mushroom, item.Coin)):
+        elif isinstance(o, (item.Mushroom, item.Coin, flag.Flag)):
             server.items.append(o)
         elif isinstance(o, (block.Normal, block.Plat, block.Item, block.Ice)):
             server.blocks.append(o)
@@ -163,17 +163,20 @@ def update():
                 server.items.remove(Item)
                 GameWorld.remove_object(Item)
         if type(Item) is item.Mushroom:
+            checkFallMushroom = True
             for Block in server.blocks:
                 dir = collision.collide_dir(Block, Item)
-                if dir == 0:
-                    Item.is_fall = True
-                elif dir == 1:
+                if dir == 1:
+                    checkFallMushroom = False
                     Item.is_fall = False
                     Item.fall_speed = 0
                 elif dir == 3:
                     Item.dir = -1
                 elif dir == 4:
                     Item.dir = 1
+
+            if checkFallMushroom:
+                Item.is_fall = True
 
     for Enemy in server.enemies:
         checkFallEnemy = True
@@ -248,10 +251,10 @@ def update():
     if readyToEnd:
         bring_time = 0
         while readyToEnd:
-            if bring_time > 3000.0:
+            if bring_time > 30.0:
                 GameFrame.push_state(State_Clear)
                 break
-            bring_time += 0.01 * GameFrame.tick_time
+            bring_time += 0.01
 
     if server.mario_time + StartTime - get_time() <= 0:
         readyToKill = True

@@ -15,12 +15,12 @@ class Mushroom:
     imageY = 4158 - 4074 - 16
 
     PIXEL_PER_METER = (25.0 / 1.8)  # 25 pixel 180cm
-    MOVE_SPEED_KMPH = 50.0  # Km / Hour
+    MOVE_SPEED_KMPH = 25.0  # Km / Hour
     MOVE_SPEED_MPM = (MOVE_SPEED_KMPH * 1000.0 / 60.0)
     MOVE_SPEED_MPS = (MOVE_SPEED_MPM / 60.0)
     MOVE_SPEED_PPS = (MOVE_SPEED_MPS * PIXEL_PER_METER)
 
-    FALL_SPEED_KMPH = 200.0
+    FALL_SPEED_KMPH = 100.0
     FALL_SPEED_MPM = (FALL_SPEED_KMPH * 1000.0 / 60.0)
     FALL_SPEED_MPS = (FALL_SPEED_MPM / 60.0)
     FALL_SPEED_PPS = (FALL_SPEED_MPS * PIXEL_PER_METER)
@@ -61,7 +61,7 @@ class Mushroom:
             self.fall_speed += Mushroom.FALL_ACCEL_PPS2
             self.fall_speed = clamp(0, self.fall_speed, Mushroom.FALL_SPEED_PPS)
             self.y -= self.fall_speed * GameFrame.tick_time
-            self.y = clamp(30, self.y, 900 - 25)
+            self.y = clamp(0, self.y, 900 - 25)
 
     def draw(self):
         cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
@@ -98,14 +98,16 @@ class Coin:
         self.__dict__.update(data)
 
     def get_bb(self):
-        return self.x - 8, self.y - 8, self.x + 8, self.y + 8
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        return cx - 8, cy - 8, cx + 8, cy + 8
 
     def update(self):
         self.frame = (self.frame + FRAMES_PER_ACTION * ACTION_PER_TIME * GameFrame.tick_time) % 8
 
     def draw(self):
-        self.image.clip_draw(self.imageX + int(self.frame) * 17, self.imageY,  16, 16, self.x, self.y)
-        draw_rectangle(*self.get_bb())
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        self.image.clip_draw(self.imageX + int(self.frame) * 17, self.imageY,  16, 16, cx, cy)
+
 
     def effect(self, player):
         server.mario_coin += 1
