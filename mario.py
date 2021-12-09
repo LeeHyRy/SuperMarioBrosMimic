@@ -1,8 +1,8 @@
 import GameFrame
-import GameWorld
+import server
 from pico2d import *
 
-# 마리오 가로 10 세로 20으로 생각 / 큰 키는 25
+# 마리오 가로 10 세로 25
 PIXEL_PER_METER = (25.0 / 1.8)  # 25 pixel 180cm
 RUN_SPEED_KMPH = 100.0  # Km / Hour
 RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
@@ -24,7 +24,7 @@ FRAMES_PER_ACTION = 8
 
 # 호출 인자 모음
 RIGHT_DOWN, LEFT_DOWN, RIGHT_UP, LEFT_UP, \
-SHIFT_UP, SHIFT_DOWN, ZERO_SPEED, SPACE, LANDING = range(9)
+SHIFT_UP, SHIFT_DOWN, ZERO_SPEED, SPACE, LANDING, END, PAUSE = range(11)
 
 # 키 할당
 key_event_table = {
@@ -103,7 +103,7 @@ def falling_mario(mario):
         mario.fall_speed += FALL_ACCEL_PPS2
         mario.fall_speed = clamp(-FALL_SPEED_PPS, mario.fall_speed, FALL_SPEED_PPS)
         mario.y -= mario.fall_speed * GameFrame.tick_time
-        mario.y = clamp(25, mario.y, 900 - 25)
+        mario.y = clamp(0, mario.y, 900 - 25)
 
 
 def draw_falling(mario):
@@ -113,22 +113,25 @@ def draw_falling(mario):
         mario.frame = 1
 
     if mario.dir == 1:
+        cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
         mario.image.clip_draw(mDict[mario.state + 'JumpX'] + int(mario.frame) * 33, mDict[mario.state + 'JumpY'], 32,
-                              32, mario.x, mario.y)
+                              32, cx, cy)
     else:
+        cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
         mario.imageF.clip_draw(mFDict[mario.state + 'JumpX'] - int(mario.frame) * 33, mFDict[mario.state + 'JumpY'], 32,
-                               32, mario.x, mario.y)
+                               32, cx, cy)
 
 
 class IdleState:
 
     def enter(mario, event):
+        mario.velocity = 0
         mario.frame = 0
 
     def exit(mario, event):
         if event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS / 2
+                mario.fall_speed = -2 * FALL_SPEED_PPS / 3
             mario.frame = 0
             mario.jumped = True
 
@@ -137,11 +140,13 @@ class IdleState:
 
     def draw(mario):
         if mario.dir == 1:
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
             mario.image.clip_draw(mDict[mario.state + 'IdleX'] + int(mario.frame) * 33, mDict[mario.state + 'IdleY'], 32, 32,
-                                  mario.x, mario.y)
+                                  cx, cy)
         else:
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
             mario.imageF.clip_draw(mFDict[mario.state + 'IdleX'] - int(mario.frame) * 33, mFDict[mario.state + 'IdleY'], 32,
-                                  32, mario.x, mario.y)
+                                  32, cx, cy)
 
 
 
@@ -160,7 +165,7 @@ class AccelState:
     def exit(mario, event):
         if event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS / 2
+                mario.fall_speed = -2 * FALL_SPEED_PPS / 3
             mario.frame = 0
             mario.jumped = True
 
@@ -169,14 +174,15 @@ class AccelState:
         mario.velocity += RUN_ACCEL_PPS2 * mario.dir
         mario.velocity = clamp(-RUN_SPEED_PPS, mario.velocity, RUN_SPEED_PPS)
         mario.x += mario.velocity * GameFrame.tick_time
-        mario.x = clamp(25, mario.x, 1600 - 25)
         falling_mario(mario)
 
     def draw(mario):
         if mario.dir == 1:
-            mario.image.clip_draw(mDict[mario.state + 'WalkX'] + int(mario.frame) * 33, mDict[mario.state + 'WalkY'], 32, 32, mario.x, mario.y)
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
+            mario.image.clip_draw(mDict[mario.state + 'WalkX'] + int(mario.frame) * 33, mDict[mario.state + 'WalkY'], 32, 32, cx, cy)
         else:
-            mario.imageF.clip_draw(mFDict[mario.state + 'WalkX'] - int(mario.frame) * 33, mFDict[mario.state + 'WalkY'], 32, 32, mario.x, mario.y)
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
+            mario.imageF.clip_draw(mFDict[mario.state + 'WalkX'] - int(mario.frame) * 33, mFDict[mario.state + 'WalkY'], 32, 32, cx, cy)
 
 
 # 일반 감속
@@ -192,7 +198,7 @@ class DecelState:
             mario.dir = -1
         elif event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS / 2
+                mario.fall_speed = -2 * FALL_SPEED_PPS / 3
             mario.frame = 0
             mario.jumped = True
 
@@ -203,14 +209,15 @@ class DecelState:
             mario.velocity = 0
             mario.add_event(ZERO_SPEED)
         mario.x += mario.velocity * GameFrame.tick_time
-        mario.x = clamp(25, mario.x, 1600 - 25)
         falling_mario(mario)
 
     def draw(mario):
         if mario.dir == 1:
-            mario.image.clip_draw(mDict[mario.state + 'WalkX'] + int(mario.frame) * 33, mDict[mario.state + 'WalkY'], 32, 32, mario.x, mario.y)
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
+            mario.image.clip_draw(mDict[mario.state + 'WalkX'] + int(mario.frame) * 33, mDict[mario.state + 'WalkY'], 32, 32, cx, cy)
         else:
-            mario.imageF.clip_draw(mFDict[mario.state + 'WalkX'] - int(mario.frame) * 33, mFDict[mario.state + 'WalkY'], 32, 32, mario.x, mario.y)
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
+            mario.imageF.clip_draw(mFDict[mario.state + 'WalkX'] - int(mario.frame) * 33, mFDict[mario.state + 'WalkY'], 32, 32, cx, cy)
 
 
 # 빠른 감속(Skid)
@@ -224,7 +231,7 @@ class SkidState:
             mario.dir *= -1
         elif event == SPACE:
             if not mario.jumped:
-                mario.fall_speed = -FALL_SPEED_PPS / 2
+                mario.fall_speed = -2 * FALL_SPEED_PPS / 3
             mario.frame = 0
             mario.jumped = True
 
@@ -234,102 +241,56 @@ class SkidState:
             mario.velocity = 0
             mario.add_event(ZERO_SPEED)
         mario.x += mario.velocity * GameFrame.tick_time
-        mario.x = clamp(25, mario.x, 1600 - 25)
         falling_mario(mario)
 
     def draw(mario):
         if mario.dir == 1:
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
             mario.image.clip_draw(mDict[mario.state + 'SkidX'] + int(mario.frame) * 33, mDict[mario.state + 'SkidY'], 32, 32,
-                                  mario.x, mario.y)
+                                  cx, cy)
         else:
+            cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
             mario.imageF.clip_draw(mFDict[mario.state + 'SkidX'] - int(mario.frame) * 33, mFDict[mario.state + 'SkidY'], 32,
-                                  32, mario.x, mario.y)
+                                  32, cx, cy)
+
 
 #
-# class JumpState:
-#
-#     def enter(mario, event):
-#         if event == SPACE:
-#             if not mario.jumped:
-#                 mario.fall_speed = -FALL_SPEED_PPS
-#         mario.frame = 0
-#         mario.jumped = True
-#
-#     def exit(mario, event):
-#         pass
-#
-#     def do(mario):
-#         if mario.fall_speed > 0:
-#             mario.frame = 1
-#         mario.x += mario.velocity * GameFrame.tick_time
-#         mario.x = clamp(25, mario.x, 1600 - 25)
-#
-#         mario.fall_speed += FALL_ACCEL_PPS2
-#         mario.fall_speed = clamp(-FALL_SPEED_PPS, mario.fall_speed, FALL_SPEED_PPS)
-#         mario.y -= mario.fall_speed * GameFrame.tick_time
-#         mario.y = clamp(25, mario.y, 900 - 25)
-#
-#
-#     def draw(mario):
-#         if mario.dir == 1:
-#             mario.image.clip_draw(mDict[mario.state + 'JumpX'] + int(mario.frame) * 33, mDict[mario.state + 'JumpY'], 32, 32, mario.x, mario.y)
-#         else:
-#             mario.imageF.clip_draw(mFDict[mario.state + 'JumpX'] - int(mario.frame) * 33, mFDict[mario.state + 'JumpY'], 32, 32, mario.x, mario.y)
-#
-#
-# # 점프 일반 감속
-# class JumpDecelState:
-#
-#     def enter(mario, event):
-#         pass
-#
-#     def exit(mario, event):
-#         if event == RIGHT_DOWN:
-#             mario.dir = 1
-#         elif event == LEFT_DOWN:
-#             mario.dir = -1
-#
-#     def do(mario):
-#         if mario.fall_speed > 0:
-#             mario.frame = 1
-#
-#         if mario.velocity * mario.dir > 0:
-#             mario.velocity -= RUN_ACCEL_PPS2 * mario.dir
-#         else:
-#             mario.velocity = 0
-#         mario.x += mario.velocity * GameFrame.tick_time
-#         mario.x = clamp(25, mario.x, 1600 - 25)
-#
-#         mario.fall_speed += FALL_ACCEL_PPS2
-#         mario.fall_speed = clamp(-FALL_SPEED_PPS, mario.fall_speed, FALL_SPEED_PPS)
-#         mario.y -= mario.fall_speed * GameFrame.tick_time
-#         mario.y = clamp(25, mario.y, 900 - 25)
-#
-#     def draw(mario):
-#         if mario.dir == 1:
-#             mario.image.clip_draw(mDict[mario.state + 'JumpX'] + int(mario.frame) * 33, mDict[mario.state + 'JumpY'], 32, 32, mario.x, mario.y)
-#         else:
-#             mario.imageF.clip_draw(mFDict[mario.state + 'JumpX'] - int(mario.frame) * 33, mFDict[mario.state + 'JumpY'], 32, 32, mario.x, mario.y)
-#
+class GameEnd:
+    def enter(mario, event):
+        mario.velocity = 0
+        mario.dir = 1
+        mario.frame = 0
+        pass
+
+    def exit(mario, event):
+        pass
+
+    def do(mario):
+        pass
+
+    def draw(mario):
+        cx, cy = mario.x - server.background.window_left, mario.y - server.background.window_bottom
+        mario.image.clip_draw(mDict[mario.state + 'IdleX'] + int(mario.frame) * 33, mDict[mario.state + 'IdleY'], 32,
+                              32, cx, cy)
 
 
 # 상태 할당
 next_state_table = {
     IdleState: {LEFT_UP: AccelState, RIGHT_UP: AccelState, RIGHT_DOWN: AccelState, LEFT_DOWN: AccelState,
-                SPACE: IdleState, ZERO_SPEED: IdleState},
+                SPACE: IdleState, ZERO_SPEED: IdleState, END: GameEnd, PAUSE: IdleState},
     AccelState: {LEFT_UP: DecelState, RIGHT_UP: DecelState, LEFT_DOWN: SkidState, RIGHT_DOWN: SkidState,
-                 SPACE: AccelState, ZERO_SPEED: AccelState},
+                 SPACE: AccelState, ZERO_SPEED: AccelState, END: GameEnd, PAUSE: IdleState},
     DecelState: {LEFT_DOWN: AccelState, RIGHT_DOWN: AccelState, ZERO_SPEED: IdleState,
-                 SPACE: DecelState},
+                 SPACE: DecelState, END: GameEnd, PAUSE: IdleState},
     SkidState: {LEFT_UP: AccelState, RIGHT_UP: AccelState, ZERO_SPEED: IdleState,
-                SPACE: SkidState}
-    # JumpState: {LEFT_UP: JumpDecelState, RIGHT_UP: JumpDecelState, LEFT_DOWN: JumpState, RIGHT_DOWN: JumpState,
-    #             SPACE: JumpState, LANDING: IdleState},
-    # JumpDecelState: {LEFT_UP: JumpState, RIGHT_UP: JumpState, LEFT_DOWN: JumpState, RIGHT_DOWN: JumpState,
-    #              SPACE: JumpDecelState, ZERO_SPEED: JumpState, LANDING: DecelState}
+                SPACE: SkidState, END: GameEnd, PAUSE: IdleState},
+    GameEnd: {LEFT_UP: GameEnd, RIGHT_UP: GameEnd, RIGHT_DOWN: GameEnd, LEFT_DOWN: GameEnd,
+              ZERO_SPEED: GameEnd, SPACE: GameEnd, END: GameEnd, PAUSE: GameEnd}
 }
 
 class Mario:
+    global FALL_SPEED_PPS
+    FALL_PPS = FALL_SPEED_PPS
 
     def __init__(self):
         self.x, self.y = 800, 400
@@ -342,20 +303,40 @@ class Mario:
         self.jumped = False
         self.frame = 0
 
-        self.coin = 0
-        self.life = 5
+        self.invi = 0
 
         self.event_que = []
         self.cur_state = IdleState
         self.cur_state.enter(self, None)
 
+    def __getstate__(self):
+        data = {'x': self.x, 'y': self.y,
+                'state': self.state,
+                'dir': self.dir,
+                'velocity': self.velocity,
+                'fall_speed': self.fall_speed,
+                'jumped': self.jumped,
+                'frame': self.frame
+        }
+
+        return data
+
+    def __setstate__(self, data):
+        self.__init__()
+        self.__dict__.update(data)
+
     def get_bb(self):
-        return self.x - 5, self.y - 16, self.x + 5, self.y + 4
+        cx, cy = self.x - server.background.window_left, self.y - server.background.window_bottom
+        return cx - 5, cy - 16, cx + 5, cy + 4
 
     def add_event(self, event):
         self.event_que.insert(0, event)
 
     def update(self):
+        if self.invi > 0:
+            self.invi -= GameFrame.tick_time
+        else:
+            self.invi = 0
         self.cur_state.do(self)
         if len(self.event_que) > 0:
             event = self.event_que.pop()
@@ -363,11 +344,15 @@ class Mario:
             self.cur_state = next_state_table[self.cur_state][event]
             self.cur_state.enter(self, event)
 
+        self.x, self.y = clamp(0, self.x, server.background.w - 1), clamp(0, self.y, server.background.h - 1)
+
+
     def draw(self):
-        if self.jumped:
-            draw_falling(self)
-        else:
-            self.cur_state.draw(self)
+        if 0 <= (math.sqrt(max(0, self.invi)) * 20) % 2 < 1:
+            if self.jumped:
+                draw_falling(self)
+            else:
+                self.cur_state.draw(self)
         draw_rectangle(*self.get_bb())
 
     def handle_event(self, event):
@@ -375,11 +360,12 @@ class Mario:
             key_event = key_event_table[(event.type, event.key)]
             self.add_event(key_event)
 
-    def stop(self):
+    def stop(self, block):
         if self.fall_speed > 0:
             self.fall_speed = 0
             self.jumped = False
             self.frame = 0
+            self.y = block.y + 8 + 16
 
     def headStop(self):
         if self.fall_speed < 0:
@@ -403,8 +389,19 @@ class Mario:
         global RUN_SPEED_MPS
         RUN_ACCEL_MPS2 = RUN_SPEED_MPS / num
 
-    def add_coin(self):
-        self.coin += 1
 
-    def kill(self):
-        self.life -= 1
+
+    def collide_wall_left(self, block):
+        self.velocity = 0
+        self.x = block.x - 8 - 6
+
+    def collide_wall_right(self, block):
+        self.velocity = 0
+        self.x = block.x + 8 + 6
+
+    def pause(self):
+        self.add_event(PAUSE)
+
+    def game_end(self):
+        self.add_event(END)
+

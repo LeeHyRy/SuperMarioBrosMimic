@@ -58,6 +58,8 @@ def push_state(state):
     global stack
     if len(stack) > 0:
         stack[-1].pause
+    stack.append(state)
+    state.enter()
 
 
 # 상태 제거(+이전 상태 불러오기)
